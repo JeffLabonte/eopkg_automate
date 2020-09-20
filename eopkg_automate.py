@@ -1,9 +1,24 @@
-import os
+#!/usr/bin/python3
+
+from glob import glob
 from subprocess import Popen
 
 
-def init_structure():
-   pass 
+MESSAGE_REQUIRE_LIST = """
+You need to specify the packages you want to install, remove, up, group install.
+"""
+
+
+COMMANDS_MAPPING = {
+    'install': ['eopkg', 'it'],
+    'remove': ['eopkg', 'rm'],
+    'group_install': ['eopkg', 'it', '-c'],
+    'update': ['eopkg', 'up'],
+}
+
+
+def has_lists():
+    return bool(glob('package_list/*', recursive=True))
 
 
 def main():
@@ -11,4 +26,7 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    if has_lists():
+        main()
+    else:
+        print(MESSAGE_REQUIRE_LIST)
