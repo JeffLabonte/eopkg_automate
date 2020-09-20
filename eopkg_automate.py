@@ -3,7 +3,7 @@
 from pathlib import Path
 from glob import glob
 from subprocess import Popen, PIPE
-from typing import List, Optional
+from typing import List
 
 
 MESSAGE_REQUIRE_LIST = """
