@@ -7,7 +7,7 @@ import pytest
 BASE_PATH = Path(__file__).resolve().parent
 
 
-@pytest.mark.parametrize('path, expected_string',[
+@pytest.mark.parametrize('path, expected_string', [
     (Path(f'{BASE_PATH}/package_lists/package_group_install.txt'), 'group_install'),
     (Path(f'{BASE_PATH}/package_lists/package_install.txt'), 'install'),
     (Path(f'{BASE_PATH}/package_lists/package_remove.txt'), 'remove'),
