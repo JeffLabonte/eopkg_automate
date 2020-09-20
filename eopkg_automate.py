@@ -2,12 +2,12 @@
 
 from pathlib import Path
 from glob import glob
-from subprocess import Popen
-from typing import List
+from subprocess import Popen, PIPE
+from typing import List, Optional
 
 
 MESSAGE_REQUIRE_LIST = """
-You need to specify the packages you want to install, remove, up, group install.
+You need to specify the packages you want to install, remove, upgrade, group install.
 """
 
 
@@ -30,15 +30,37 @@ def get_package_lists_path() -> List:
     return [p for p in glob('package_lists/package_*.txt', recursive=True) if '.template' not in p]
 
 
+def get_packages(file_path):
+    with open(file_path, 'r') as f:
+        return [line.strip() for line in f.readlines()]
+
+
+def run_command(action: str, packages: List):
+    if action == 'update':
+        command = ['sudo', *COMMANDS_MAPPING[action]]
+    else:
+        command = ['sudo', *COMMANDS_MAPPING[action], *packages]
+    cli_call = Popen(command, stdout=PIPE, stderr=PIPE)
+    command_string = ' '.join(command)
+    print(f'Executing:\n {command_string}\n')
+    msg, err = cli_call.communicate()
+    if msg:
+        print(msg.decode('utf-8'))
+
 
 def main(package_lists_path: List):
     for path in package_lists_path:
-        pass
-        
+        action = extract_action_from_path(path)
+        packages = get_packages(path)
+
+        if action != 'update' and not packages:
+            continue
+
+        run_command(action, packages)
 
 
 if __name__ == '__main__':
-    package_lists_path = get_package_lists()
+    package_lists_path = get_package_lists_path()
     if package_lists_path:
         main(
             package_lists_path=package_lists_path,
