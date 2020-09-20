@@ -1,3 +1,8 @@
+SHELL := /bin/bash
+
 
 install_dev:
-	pip3 install -r requirements.dev.txt
+	pip3 install -r requirements/requirements.dev.txt
+
+test:
+	pytest tests/test*.py
