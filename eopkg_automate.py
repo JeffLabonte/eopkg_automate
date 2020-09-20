@@ -17,8 +17,8 @@ COMMANDS_MAPPING = {
 }
 
 
-def has_lists():
-    return bool(glob('package_list/*', recursive=True))
+def get_package_lists():
+    return glob('package_lists/*', recursive=True)
 
 
 def main():
