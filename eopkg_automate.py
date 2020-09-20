@@ -2,6 +2,7 @@
 
 from glob import glob
 from subprocess import Popen
+from typing import List
 
 
 MESSAGE_REQUIRE_LIST = """
@@ -17,16 +18,21 @@ COMMANDS_MAPPING = {
 }
 
 
-def get_package_lists():
-    return glob('package_lists/*', recursive=True)
+def get_package_lists_path() -> List:
+    return [p for p in glob('package_lists/package_*.txt', recursive=True) if '.template' not in p]
 
 
-def main():
-    pass
+def main(package_lists_path: List):
+    for path in package_lists_path:
+        pass
+        
 
 
 if __name__ == '__main__':
-    if has_lists():
-        main()
+    package_lists_path = get_package_lists()
+    if package_lists_path:
+        main(
+            package_lists_path=package_lists_path,
+        )
     else:
         print(MESSAGE_REQUIRE_LIST)
