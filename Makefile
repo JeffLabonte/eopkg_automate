@@ -6,3 +6,6 @@ install_dev:
 
 test:
 	python -m pytest tests/test*.py
+
+codestyle:
+	flake8
