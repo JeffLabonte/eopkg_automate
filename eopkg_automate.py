@@ -1,69 +1,78 @@
 #!/usr/bin/python3
+import argparse
 
 from pathlib import Path
-from glob import glob
 from subprocess import Popen, PIPE
 from typing import List
 
 
-MESSAGE_REQUIRE_LIST = """
-You need to specify the packages you want to install, remove, upgrade, group install.
-"""
-
-
 COMMANDS_MAPPING = {
-    'install': ['eopkg', 'it'],
-    'remove': ['eopkg', 'rm'],
-    'group_install': ['eopkg', 'it', '-c'],
-    'update': ['eopkg', 'up'],
+    "install": ["eopkg", "it"],
+    "remove": ["eopkg", "rm"],
+    "group_install": ["eopkg", "it", "-c"],
+    "update": ["eopkg", "up"],
 }
 
 
-def extract_action_from_path(path: Path) -> str:
-    filename =  str(path).split('/')[-1]
-    after_underscore_index = filename.find('_') + 1
-    dot_index = filename.find('.')
-    return filename[after_underscore_index:dot_index]
+def get_actions_args(arguments) -> str:
+    if not hasattr(arguments, "file"):
+        raise SystemError("You need to specify a file for installation or removal")
+
+    return "install" if arguments.install else "remove"
 
 
-def get_package_lists_path() -> List:
-    return [p for p in glob('package_lists/package_*.txt', recursive=True) if '.template' not in p]
+def get_packages_from_path(file_path: str) -> List:
+    package_path = Path(file_path).resolve()
+    return get_packages(package_path)
 
 
 def get_packages(file_path):
-    with open(file_path, 'r') as f:
+    with open(file_path, "r") as f:
         return [line.strip() for line in f.readlines()]
 
 
-def run_command(action: str, packages: List):
-    if action == 'update':
-        command = ['sudo', *COMMANDS_MAPPING[action]]
-    else:
-        command = ['sudo', *COMMANDS_MAPPING[action], *packages]
+def run_command(command: str):
     cli_call = Popen(command, stdout=PIPE, stderr=PIPE)
-    command_string = ' '.join(command)
-    print(f'Executing:\n {command_string}\n')
+    command_string = " ".join(command)
+    print(f"Executing:\n {command_string}\n")
     msg, err = cli_call.communicate()
     if msg:
-        print(msg.decode('utf-8'))
+        print(msg.decode("utf-8"))
 
 
-def main(package_lists_path: List):
-    for path in package_lists_path:
-        action = extract_action_from_path(path)
-        packages = get_packages(path)
+def create_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description="eopkg helper")
 
-        if action != 'update' and not packages:
-            continue
+    parser.add_argument(
+        "--up",
+        "-u",
+        dest="update",
+        action="store_true",
+        help="Run update before install or removal",
+    )
+    parser.add_argument("--file", "-f", type=str, help="Path to your package list to install or remove")
 
-        run_command(action, packages)
+    install_remove_group = parser.add_mutually_exclusive_group()
+    install_remove_group.add_argument("--install", "-i", action="store_true", help="List is going to be install")
+    install_remove_group.add_argument("--remove", "-rm", action="store_true", help="List is going to be remove")
+
+    return parser
 
 
-if __name__ == '__main__':
-    package_lists_path = get_package_lists_path()
-    if package_lists_path:
-        main(
-            package_lists_path=package_lists_path,
-        )
-    else:
-        print(MESSAGE_REQUIRE_LIST)
+def main():
+    parser = create_parser()
+    arguments = parser.parse_args()
+
+    if arguments.update:
+        command = ["sudo", *COMMANDS_MAPPING["update"]]
+        run_command(command=command)
+
+    if arguments.install or arguments.remove:
+        action = get_actions_args(arguments)
+        packages = get_packages_from_path(arguments.file)
+        command = ["sudo", *COMMANDS_MAPPING[action], *packages]
+        run_command(command=command)
+
+
+if __name__ == "__main__":
+    main()
