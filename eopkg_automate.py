@@ -7,10 +7,10 @@ from typing import List
 
 
 COMMANDS_MAPPING = {
-    "install": ["eopkg", "it"],
-    "remove": ["eopkg", "rm"],
-    "group_install": ["eopkg", "it", "-c"],
-    "update": ["eopkg", "up"],
+    'install': ['eopkg', 'it', '-y'],
+    'remove': ['eopkg', 'rm', '-y'],
+    'group_install': ['eopkg', 'it', '-y', '-c'],
+    'update': ['eopkg', 'up', '-y'],
 }
 
 
